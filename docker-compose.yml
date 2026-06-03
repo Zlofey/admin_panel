@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:15-alpine
     env_file:
-      - app/.env
+      - app/config/.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -11,7 +11,7 @@ services:
   service:
     build: app
     env_file:
-      - app/.env
+      - app/config/.env
     volumes:
       - static_volume:/opt/app/static
     expose:

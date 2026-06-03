@@ -16,7 +16,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
-COPY uwsgi/uwsgi.ini .
 COPY entrypoint.sh .
 RUN sed -i 's/\r$//g' /opt/app/entrypoint.sh && chmod +x /opt/app/entrypoint.sh
 
@@ -28,6 +27,6 @@ RUN mkdir -p /var/www/static /var/www/media \
 COPY --chown=app:app . .
 RUN chmod +x /opt/app/entrypoint.sh
 
-USER root
+#USER root
 EXPOSE 8000
 ENTRYPOINT ["/opt/app/entrypoint.sh"]

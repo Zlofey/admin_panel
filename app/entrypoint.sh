@@ -9,11 +9,6 @@ if [ "$DATABASE" = "postgres" ]; then
     echo "PostgreSQL started"
 fi
 
-: "${UWSGI_PROCESSES:=2}"
-: "${UWSGI_THREADS:=2}"
-: "${UWSGI_HARAKIRI:=60}"
-export UWSGI_PROCESSES UWSGI_THREADS UWSGI_HARAKIRI
-
 mkdir -p /opt/app/static /var/www/static /var/www/media
 chown -R app:app /opt/app/static /var/www/static /var/www/media
 
@@ -40,7 +35,15 @@ if not User.objects.filter(username=username).exists():
 else:
     print(f\"Superuser '{username}' already exists\")
 PY"
-    exec su -s /bin/sh app -c "uwsgi --strict --ini /opt/app/uwsgi.ini"
+  # Запускаем Gunicorn
+  # Разберём каждый флаг ниже
+  exec gunicorn config.wsgi:application \
+      --bind 0.0.0.0:8000 \
+      --workers 3 \
+      --threads 2 \
+      --timeout 120 \
+      --access-logfile - \
+      --error-logfile -
 fi
 
 python manage.py shell <<'PY'
@@ -65,4 +68,4 @@ if not User.objects.filter(username=username).exists():
 else:
     print(f"Superuser '{username}' already exists")
 PY
-exec uwsgi --strict --ini /opt/app/uwsgi.ini
+
