@@ -1,0 +1,31 @@
+[project]
+name = "etl"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "black>=26.5.1",
+    "elasticsearch>=9.4.1",
+    "psycopg>=3.3.4",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.1",
+    "python-dotenv>=1.2.2",
+]
+
+[tool.black]
+line-length = 100
+target-version = ['py314']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.venv
+  | venv
+  | env
+  | .env
+  | build
+  | dist
+)/
+'''

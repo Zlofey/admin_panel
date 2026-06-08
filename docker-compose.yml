@@ -30,6 +30,17 @@ services:
     ports:
       - "80:80"
 
+  elasticsearch:
+    image: elasticsearch:9.4.2
+    environment:
+      - discovery.type=single-node       # Fixes Bootstrap Check #1
+      - xpack.security.enabled=false     # Fixes Bootstrap Check #2
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9201:9200"
+
 volumes:
   postgres_data:
   static_volume:
+  elasticsearch_data:
