@@ -6,14 +6,16 @@ from typing import Type
 from psycopg2._psycopg import cursor
 from psycopg2.extras import DictCursor
 
-from etl import transformers
 from etl.extractors.base_filmwork_extractor import BaseFilmworkExtractor
+from helpers.logger import LoggerFactory
 from etl.loaders.filmwork_loader import FilmworkLoader
 from etl.transformers.filmwork_transformer import FilmworkTransformer
 from helpers.state import State, RedisStorage
 from storage_clients.elasticsearch_client import ElasticsearchClient
 from storage_clients.postgres_client import PostgresClient
 from storage_clients.redis_client import RedisClient
+
+logger = LoggerFactory().get_logger()
 
 
 def movie_etl(settings, extractor_type: Type[BaseFilmworkExtractor], state_key: str, timeout: int = 2.5):
@@ -47,6 +49,9 @@ def movie_etl(settings, extractor_type: Type[BaseFilmworkExtractor], state_key: 
             transform_pipe=transformer.transform,
         )
         while True:
-            extractor.extract()
+            try:
+                extractor.extract()
+            except Exception:
+                logger.exception("ETL pipeline `%s` failed", state_key)
             time.sleep(timeout)
 

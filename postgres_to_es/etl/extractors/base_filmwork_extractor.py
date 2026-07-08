@@ -4,6 +4,7 @@ from os import pipe
 from typing import Callable, Generator
 
 from psycopg2.sql import SQL, Identifier
+from pydantic import ValidationError
 
 from helpers.logger import LoggerFactory
 from helpers.state import State
@@ -188,7 +189,18 @@ class BaseFilmworkExtractor(ABC):
                         [tuple([row.id for row in rows])],
                     )
                     while results := cur.fetchmany(self.extract_chunk):
-                        pipe.send((last_updated, [Filmwork(**result) for result in results]))
+                        filmworks = []
+                        for result in results:
+                            try:
+                                filmworks.append(Filmwork(**result))
+                            except ValidationError as exc:
+                                logger.error(
+                                    "Skip invalid filmwork `%s`: %s",
+                                    result.get("id"),
+                                    exc,
+                                )
+                        if filmworks:
+                            pipe.send((last_updated, filmworks))
             except GeneratorExit:
                 logger.debug(
                     "Merge loop finished"
